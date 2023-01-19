@@ -11,7 +11,7 @@ class User(_database.Base):
     __tablename__ = "users"
     id = _sql.Column(_sql.Integer, primary_key=True, index=True)
     email = _sql.Column(_sql.String, unique=True, index=True)
-    hashed_password = _sql.Column(_sql.String)    
+    hashed_password = _sql.Column(_sql.String)
     leads = _orm.relationship("Lead", back_populates="owner")
     first_name = _sql.Column(_sql.String)
     last_name = _sql.Column(_sql.String)

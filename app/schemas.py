@@ -4,8 +4,7 @@ import pydantic as _pydantic
 
 
 class _UserBase(_pydantic.BaseModel):
-    email: str    
-
+    email: str
 
 
 class UserCreate(_UserBase):
@@ -18,7 +17,7 @@ class UserCreate(_UserBase):
 
 
 class User(_UserBase):
-    id: int   
+    id: int
 
     class Config:
         orm_mode = True

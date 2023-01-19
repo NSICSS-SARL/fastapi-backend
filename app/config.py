@@ -21,11 +21,11 @@ class Settings(BaseSettings):
     JWT_SECRET: str = config_env["JWT_SECRET"]
     DATABASE_URL = config_env['DATABASE_URL']
     origins: list[str] = config_env["origins"]
-    
-    REMOTE_HOST:str = config_env['REMOTE_HOST']
+
+    REMOTE_HOST: str = config_env['REMOTE_HOST']
     REMOTE_PORT: int = config_env['REMOTE_PORT']
     REMOTE_PROTOCOLE: str = config_env['REMOTE_PORT']
-    
+
     class Config:
         def __init__(self):
             pass
