@@ -66,9 +66,7 @@ def init_app():
             raise _fastapi.HTTPException(status_code=500, detail="Error")
         return await _services.parse_user(token, db)
     
-    @app.get("/token")
-    async def get_user(token: str = None, db: _orm.Session = _fastapi.Depends(_services.get_db), ):
-        return verify_token(token, db)
+    
 
     @app.get("/api/users/me", response_model=_schemas.User)
     async def get_user(user: _schemas.User = _fastapi.Depends(_services.get_current_user)):
