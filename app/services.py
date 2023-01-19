@@ -36,14 +36,21 @@ def close_db():
 async def get_user_by_email(email: str, db: _orm.Session):
     return db.query(_models.User).filter(_models.User.email == email).first()
 
+async def get_lead_by_email(email: str, db: _orm.Session):
+    return db.query(_models.Lead).filter(_models.Lead.email == email).first()
+
 
 async def create_user(user: _schemas.UserCreate, db: _orm.Session):
     user_obj = _models.User(email=user.email, hashed_password=_hash.bcrypt.hash(user.hashed_password),
-                            # first_name=user.first_name, last_name=user.last_name
+                            
                             )
     db.add(user_obj)
     db.commit()
-    db.refresh(user_obj)
+    db.refresh(user_obj)    
+    lead_obj = _models.Lead(owner_id = user_obj.id, first_name=user.first_name, last_name=user.last_name,email=user.email)
+    db.add(lead_obj)
+    db.commit()
+    db.refresh(lead_obj)
     return user_obj
 
 

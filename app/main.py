@@ -71,9 +71,18 @@ def init_app():
         return await _services.parse_user(token, db)    
 
     @app.get("/api/users/me", response_model=_schemas.User)
-    async def get_user(user: _schemas.User = _fastapi.Depends(_services.get_current_user)):
-        print(user)
+    async def get_user(user: _schemas.User = _fastapi.Depends(_services.get_current_user)):       
         return user
+    
+    @app.get("/api/users/about", response_model=_schemas.Lead)
+    async def get_info_user(email: str, db: _orm.Session = _fastapi.Depends(_services.get_db)):       
+        if email is None:
+            raise _fastapi.HTTPException(status_code=500, detail="Error")
+        user = _services.get_lead_by_email(email, db)
+        if not user:
+            raise _fastapi.HTTPException(status_code=401, detail="Invalid email")
+        return user
+       
 
     @app.post("/api/leads", response_model=_schemas.Lead)
     async def create_lead(lead: _schemas.LeadCreate, user: _schemas.User = _fastapi.Depends(_services.get_current_user),
