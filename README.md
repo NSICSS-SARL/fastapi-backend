@@ -1,2 +1,1 @@
-# fastapi-only
-back-end for python fastapi
+# react-fastapi
