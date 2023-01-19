@@ -12,15 +12,15 @@ class User(_database.Base):
     id = _sql.Column(_sql.Integer, primary_key=True, index=True)
     email = _sql.Column(_sql.String, unique=True, index=True)
     hashed_password = _sql.Column(_sql.String)
-    # token = _sql.Column(_sql.String)
-    # password = _sql.Column(_sql.String)
     leads = _orm.relationship("Lead", back_populates="owner")
+    first_name = _sql.Column(_sql.String)
+    last_name = _sql.Column(_sql.String)
 
     def verify_password(self, password: str):
         return _hash.bcrypt.verify(password, self.hashed_password)
 
     def __str__(self) -> str:
-        return f'id={self.id}; email={self.email}; password={self.password}'
+        return f'id={self.id}; email={self.email}, first_name={self.first_name}, last_name={self.last_name}'
 
 
 class Lead(_database.Base):

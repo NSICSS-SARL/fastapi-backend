@@ -9,6 +9,8 @@ class _UserBase(_pydantic.BaseModel):
 
 class UserCreate(_UserBase):
     hashed_password: str
+    first_name: str
+    last_name: str
 
     class Config:
         orm_mode = True
@@ -16,9 +18,6 @@ class UserCreate(_UserBase):
 
 class User(_UserBase):
     id: int
-    # token: str = None
-
-    # password: str = None
 
     class Config:
         orm_mode = True

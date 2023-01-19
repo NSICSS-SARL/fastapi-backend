@@ -38,17 +38,21 @@ def init_app():
         allow_methods=["*"],
         allow_headers=["*"]
     )
-    
+
     @app.get("/api")
     async def root():
         port = str(Configs.REMOTE_PORT)
         protocole = Configs.REMOTE_PROTOCOLE
         host = Configs.REMOTE_HOST
-        return {"message": "Welcome to OAuth2 app!", "host": host, "port":port, "protocole":protocole}    
+        return {"message": "Welcome to OAuth2 app!", "host": host, "port": port, "protocole": protocole}
 
-    @app.get("/test")
-    async def test():
-        return {"message": "Awesome welcome"}
+    @app.post("/api/users")
+    async def create_user(user: _schemas.UserCreate, db: _orm.Session = _fastapi.Depends(_services.get_db)):
+        db_user = await _services.get_user_by_email(user.email, db)
+        if db_user:
+            raise _fastapi.HTTPException(status_code=400, detail="Email already in use")
+        user = await _services.create_user(user, db)
+        return await _services.create_token(user, db)
 
     @app.post("/api/token")
     async def generate_token(form_data: _security.OAuth2PasswordRequestForm = _fastapi.Depends(),
@@ -65,13 +69,18 @@ def init_app():
         if token is None:
             raise _fastapi.HTTPException(status_code=500, detail="Error")
         return await _services.parse_user(token, db)
-    
-    @app.get("/token")
-    async def get_user(token: str = None, db: _orm.Session = _fastapi.Depends(_services.get_db), ):
-        return verify_token(token, db)
 
     @app.get("/api/users/me", response_model=_schemas.User)
     async def get_user(user: _schemas.User = _fastapi.Depends(_services.get_current_user)):
+        return user
+
+    @app.get("/api/users/about", response_model=_schemas.Lead)
+    async def get_info_user(email: str, db: _orm.Session = _fastapi.Depends(_services.get_db)):
+        if email is None:
+            raise _fastapi.HTTPException(status_code=500, detail="Error")
+        user = _services.get_lead_by_email(email, db)
+        if not user:
+            raise _fastapi.HTTPException(status_code=401, detail="Invalid email")
         return user
 
     @app.post("/api/leads", response_model=_schemas.Lead)
@@ -106,7 +115,7 @@ def init_app():
     async def startup():
         BASE_DIR = Path(__file__).resolve().parent.parent
         # Specify path
-        path = str(BASE_DIR) + '\\test.db'        
+        path = str(BASE_DIR) + '\\test.db'
         isExist = os.path.exists(path)
         if not isExist:
             _services.create_database()
@@ -125,22 +134,15 @@ def init_app():
         file_path = os.path.join(app.root_path, "static")
         return FileResponse(path=file_path, headers={"Content-Disposition": "attachment; filename=" + file_name})
 
-    @app.post("/api/users")
-    async def create_user(user: _schemas.UserCreate, db: _orm.Session = _fastapi.Depends(_services.get_db)):
-        db_user = await _services.get_user_by_email(user.email, db)
-        if db_user:
-            raise _fastapi.HTTPException(status_code=400, detail="Email already in use")
-        user = await _services.create_user(user, db)
-        return await _services.create_token(user, db)
-
     return app
 
 
 app = init_app()
 
-if __name__ =="__main__":
+if __name__ == "__main__":
     app = init_app()
     uvicorn.run(app, host=Configs.HOST, port=Configs.PORT, reload=True)
+
 
 def start():
     """Launched with 'poetry run start' at root level """
